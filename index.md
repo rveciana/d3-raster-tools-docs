@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Jekyll Docs Template"
+title: "D3js raster tools docs"
 ---
 
 ### Get Started
