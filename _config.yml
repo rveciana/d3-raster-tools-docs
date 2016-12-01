@@ -1,12 +1,13 @@
 # Site title and subtitle. This is used in _includes/header.html
-title: 'D3js raster tools tutorial'
-subtitle: 'Painless documentation for your projects'
+title: 'D3js raster tools docs'
+subtitle: 'Draw raster data using D3js in the browser or nodejs'
 
 # if you wish to integrate disqus on pages set your shortname here
 disqus_shortname: 'geoexamples'
 
 # if you use google analytics, add your tracking id here
-google_analytics_id: 'UA-36383259-2'
+#google_analytics_id: 'UA-36383259-2'
+google_analytics_id: ''
 
 # Enable/show navigation. There are there options:
 #   0 - always hide
@@ -15,15 +16,14 @@ google_analytics_id: 'UA-36383259-2'
 navigation: 2
 
 # URL to source code, used in _includes/footer.html
-codeurl: 'https://github.com/bruth/jekyll-docs-template'
+codeurl: 'https://github.com/rveciana/d3-raster-tools-docs'
 
 # Default categories (in order) to appear in the navigation
 sections: [
-    ['doc', 'Documentation'],
-    ['tut', 'Tutorial'],
+    ['intr', 'Introduction'],
+    ['plot', 'Plotting Data'],
     ['ref', 'Reference'],
-    ['dev', 'Developers'],
-    ['post', 'Posts']
+    ['exp', 'Examples']
 ]
 
 # Keep as an empty string if served up at the root. If served up at a specific
