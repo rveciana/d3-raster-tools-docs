@@ -92,3 +92,31 @@ td, th {
   padding: .25rem .5rem;
   border: 1px solid #e5e5e5;
 }
+
+
+/**
+ * Links
+ */
+a {
+    color: #6c916c;
+    text-decoration: none;
+
+    &:visited {
+        color: #618261;
+    }
+
+    &:hover {
+        color: #111;
+        text-decoration: underline;
+    }
+}
+
+.site-header {
+    border-top: 5px solid #5f805f;
+    border-bottom: 1px solid #afebaf;
+    min-height: 56px;
+
+
+    // Positioning context for the mobile navigation icon
+    position: relative;
+}

@@ -2,7 +2,7 @@
 layout: page
 title: "GeoTransform"
 category: intr
-date: 2016-12-01 10:46:03
+date: 2016-12-07 18:19:49
 disqus: 1
 ---
 In all the examples and functions the word *GeoTransform* will appear. It's a word that doesn't appear when talking about vectorial data. A *raster band* is a two dimension matrix with the magnitude value at each position or pixel. Since it's geographical data, each pixel is located somewhere on the Globe. The formula that converts the pixel position on the matrix to the map coordinates is called the *GeoTransform*.
@@ -20,7 +20,7 @@ Where GT is the GeoTransform array, which has six positions:
 * Xpixel is the column of the matrix and Yline the line
 * All the parameters are in the raster projection (lat-lom, UTM, Mercator, etc)
 
-<img src="{{ site.baseurl }}/images/geotransform.svg" width="300" />
+<img src="{{ site.baseurl }}/images/geotransform/geotransform.svg" width="300" />
 
 The figure shows the most common case, where the GT(2) and GT(4) terms are zero, so there is no rotation of the image. The formula would be:
 
