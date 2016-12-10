@@ -1,36 +1,52 @@
 ---
-layout: page
-title: "Drawing raster data"
-category: plot
-date: 2016-12-07 17:17:40
-disqus: 1
+layout: default
+title: "Drawing GeoTIFF pixels"
 ---
-
-When [reading a raster]({{ site.baseurl }}{% post_url 2016-12-07-reading-raster-data %}), the result is a matrix with the value for each pixel. With this data, the simplest thing to do is drawing the value of each pixel.
-
-To draw them, only the *canvas* option is available for performance reasons, since the amount of pixels is usually very high.
-
-Drawing the GeoTIFF pixels
+Drawing GeoTIFF pixels
 --------------------------
-Let's see the most important code parts to get this example:
+Example from the [drawing raster data]({{ site.baseurl }}{% post_url 2016-12-07-drawing-raster-data %}) section.
 
 <iframe frameborder="no" border="0" scrolling="no" marginwidth="0" marginheight="0" width="690" height="510" src="{{ site.baseurl }}/code_samples/raster-pixels.html"></iframe>
 
-You can find [the whole code here]({{ site.baseurl }}/code_samples/raster-pixels-page.html)
 {% highlight js %}
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+</style>
+<body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="geotiff.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script>
+var width = 680,
+    height = 500;
+
 var projection = d3.geoAzimuthalEqualArea()
     .rotate([-55.5, -24])
     .scale(1100);
-{% endhighlight %}
-* The projection is set to *geoAzimuthalEqualArea*, but the nice thing about D3js is that this could be changed and the result would change accordingly
-{% highlight js %}
+
+var canvas = d3.select("body").append("canvas")
+    .attr("width", width)
+    .attr("height", height);
+
+var context = canvas.node().getContext("2d");
 d3.request("tz850.tiff")
   .responseType('arraybuffer')
   .get(function(error, tiffData){
 d3.json("world-110m.json", function(error, topojsonData) {
-{% endhighlight %}
-* Note that, as explained in the [reading a raster]({{ site.baseurl }}{% post_url 2016-12-07-reading-raster-data %}) page, the request is a bit different for the GeoTIFF
-{% highlight js %}
+  var countries = topojson.feature(topojsonData, topojsonData.objects.countries);
+  var path = d3.geoPath()
+      .projection(projection).context(context);
+
+  context.beginPath();
+  context.strokeStyle = "#777";
+  context.fillStyle = "#aaa";
+  path(countries);
+  context.fill();
+  context.stroke();
+
   var tiff = GeoTIFF.parse(tiffData.response);
   var image = tiff.getImage();
   var rasters = image.readRasters();
@@ -46,10 +62,9 @@ d3.json("world-110m.json", function(error, topojsonData) {
           tempData[j][i] = rasters[1][i + j*image.getWidth()];
       }
   }
-{% endhighlight %}
-* The GeoTIFF is read as explained in the [reading a raster]({{ site.baseurl }}{% post_url 2016-12-07-reading-raster-data %}) page
 
-{% highlight js %}
+
+  //Creating the color scale https://github.com/santilland/plotty/blob/master/src/plotty.js
   var cs_def = {positions:[0, 0.25, 0.5, 0.75, 1], colors:["#0571b0", "#92c5de", "#f7f7f7", "#f4a582", "#ca0020"]};
   var scaleWidth = 256;
   var canvasColorScale = d3.select("body").append("canvas")
@@ -66,11 +81,8 @@ d3.json("world-110m.json", function(error, topojsonData) {
   contextColorScale.fillRect(0, 0, scaleWidth, 1);
 
   var csImageData = contextColorScale.getImageData(0, 0, scaleWidth-1, 1).data;
-{% endhighlight %}
-* The color scale is created as explained in the [color scales]({{ site.baseurl }}{% post_url 2016-12-09-color-scales %}) page
 
-This is the actual drawing part:
-{% highlight js %}
+  //Drawing the image
   var canvasRaster = d3.select("body").append("canvas")
       .attr("width", width)
       .attr("height", height)
@@ -105,14 +117,11 @@ This is the actual drawing part:
   }
   contextRaster.putImageData( id, 0, 0);
   context.drawImage(canvasRaster.node(), 0, 0);
-{% endhighlight %}
-* A separate canvas is created, so any pixel drawing won't affect the background
-  * *var data* has the pixel values of this new created canvas. The array has four elements for each pixel to represent the RGBA values. It's the fastest way to draw an image, much more than drawing small rectangles
-* The iteration is for each pixel in the output canvas, not the original GeoTIFF matrix
-  * To get the position in the values matrix, the output projection must be transformed to lat-lon using *projection.invert*
-  * Since the GeiTIFF is already in latlon, apply the [inverse GeoTransform]({{ site.baseurl }}{% post_url 2016-12-07-geotransform %}) to get the position in the values matrix
-  * We want to represent the original pixels, in this example, so the pixel position is rounded to get the nearest pixel in the values matrix
-* The color to use is calculated with the method explained in the [color scales]({{ site.baseurl }}{% post_url 2016-12-09-color-scales %}) page
 
-Interpolating the GeoTIFF pixels to get a smooth image
-------------------------------------------------------
+
+});
+});
+</script>
+
+</body>
+{% endhighlight %}
