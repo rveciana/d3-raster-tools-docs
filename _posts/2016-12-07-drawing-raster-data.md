@@ -116,3 +116,20 @@ This is the actual drawing part:
 
 Interpolating the GeoTIFF pixels to get a smooth image
 ------------------------------------------------------
+This example is very similar to the previous one, but the value for each pixel is calculated interpolating the surrounding values with a [bilinear interpolation](http://strauss.pas.nu/js-bilinear-interpolation.html).
+
+<iframe frameborder="no" border="0" scrolling="no" marginwidth="0" marginheight="0" width="690" height="510" src="{{ site.baseurl }}/code_samples/raster-interpolation.html"></iframe>
+
+The [whole code is here]({{ site.baseurl }}/code_samples/raster-interpolation-page.html). The only changes are:
+{% highlight js %}
+var px = invGeoTransform[0] + pointCoords[0]* invGeoTransform[1];
+var py = invGeoTransform[3] + pointCoords[1] * invGeoTransform[5];
+{% endhighlight %}
+* The pixel positions are not rounded, we need to know the decimal part of it to interpolate
+{% highlight js %}
+var value = tempData[Math.floor(py)][Math.floor(px)]*(Math.ceil(px)-px)*(Math.ceil(py)-py)+
+tempData[Math.floor(py)][Math.ceil(px)]*(px-Math.floor(px))*(Math.ceil(py)-py) +
+tempData[Math.ceil(py)][Math.floor(px)]*(Math.ceil(px)-px)*(py-Math.floor(py)) +
+tempData[Math.ceil(py)][Math.ceil(px)]*(px-Math.floor(px))*(py-Math.floor(py));
+{% endhighlight %}
+* A [bilinear interpolation](https://en.wikipedia.org/wiki/Bilinear_interpolation) is used to get the value. The inverse of distance gives uglier results, with visible pixels
