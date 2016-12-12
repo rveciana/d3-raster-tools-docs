@@ -3,10 +3,10 @@ layout: default
 title: "Drawing wind arrows"
 ---
 Drawing wind arrows
--------------------
-Canvas example from the [arrows and barbs]({{ site.baseurl }}{% post_url 2016-12-11-arrows-and-barbs %}) section. The data and the code are based on this [wind barbs example]({{ site.baseurl }}/code_samples/wind-barbs-page.html).
+--------------------------
+SVG example from the [arrows and barbs]({{ site.baseurl }}{% post_url 2016-12-11-arrows-and-barbs %}) section. The data and the code are based on this [wind barbs example]({{ site.baseurl }}/code_samples/wind-barbs-svg-page.html).
 
-<iframe frameborder="no" border="0" scrolling="no" marginwidth="0" marginheight="0" width="690" height="510" src="{{ site.baseurl }}/code_samples/wind-arrows.html"></iframe>
+<iframe frameborder="no" border="0" scrolling="no" marginwidth="0" marginheight="0" width="690" height="510" src="{{ site.baseurl }}/code_samples/wind-arrows-svg.html"></iframe>
 
 {% highlight js %}
 <!DOCTYPE html>
@@ -17,6 +17,7 @@ Canvas example from the [arrows and barbs]({{ site.baseurl }}{% post_url 2016-12
 <script src="geotiff.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
 <script>
 var width = 680,
     height = 500,
@@ -28,24 +29,24 @@ var projection = d3.geoConicConformal()
     .scale(2000)
     .translate([width / 2, height / 2]);
 
-var canvas = d3.select("body").append("canvas")
+var path = d3.geoPath()
+    .projection(projection);
+
+var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-var context = canvas.node().getContext("2d");
 d3.request("gfs.tiff")
   .responseType('arraybuffer')
   .get(function(error, tiffData){
 d3.json("world-110m.json", function(error, topojsonData) {
-  var countries = topojson.feature(topojsonData, topojsonData.objects.countries);
-  var path = d3.geoPath()
-      .projection(projection).context(context);
 
-  context.beginPath();
-  context.strokeStyle = "#000";
-  context.fillStyle = "#aaa";
-  path(countries);
-  context.fill();
+  var countries = topojson.feature(topojsonData, topojsonData.objects.countries);
+  svg.insert("path", ".map")
+      .datum(countries)
+      .attr("d", path)
+      .style("fill", "#ccc")
+      .style("stroke", "#777");
 
   var tiff = GeoTIFF.parse(tiffData.response);
   var image = tiff.getImage();
@@ -87,27 +88,13 @@ d3.json("world-110m.json", function(error, topojsonData) {
       var px = Math.round((coords[0] - geoTransform[0]) / geoTransform[1]);
       var py = Math.round((coords[1] - geoTransform[3]) / geoTransform[5]);
 
-      var angle = Math.atan2(-vData[py][px],uData[py][px]);
+      var angle = (180/Math.PI) * Math.atan2(-vData[py][px],uData[py][px]);
       var spd = spdData[py][px];
-      context.save();
-      context.translate(x, y);
-      context.rotate(angle);
-      context.scale(sizeScale(spd), sizeScale(spd));
-      context.beginPath();
-      context.strokeStyle = "#444";
-      context.fillStyle = colorScale(spd);
-
-      context.moveTo(-arrowSize/2,0);
-      context.lineTo(arrowSize/5,arrowSize/6);
-      context.lineTo(arrowSize/5,arrowSize/3);
-      context.lineTo(arrowSize/2,0);
-      context.lineTo(arrowSize/5,-arrowSize/3);
-      context.lineTo(arrowSize/5,-arrowSize/6);
-      context.lineTo(-arrowSize/2,0);
-
-      context.stroke();
-      context.fill();
-      context.restore();
+      svg.append("path")
+        .attr("d", "M"+-arrowSize/2+",0L"+arrowSize/5+","+arrowSize/6+"L"+arrowSize/5+","+arrowSize/3+"L"+arrowSize/2+",0L"+arrowSize/5+","+(-arrowSize/3)+"L"+arrowSize/5+","+(-arrowSize/6)+"Z")
+        .style("fill", colorScale(spd))
+        .style("stroke", "#444")
+        .attr("transform", "translate("+x+", "+y+")rotate("+angle+")scale("+sizeScale(spd)+")");;
     });
   });
 
@@ -115,6 +102,5 @@ d3.json("world-110m.json", function(error, topojsonData) {
 });
 });
 </script>
-
 </body>
 {% endhighlight %}
