@@ -11,7 +11,133 @@ When the values are a vector field instead of a scalar field (i.e. wind, wave di
 
 Arrows
 ------
+The most intuitive way to show force and direction of any magnitude is drawing small arrows with the direction and dimensioning or coloring them depending on the module:
 
+<iframe frameborder="no" border="0" scrolling="no" marginwidth="0" marginheight="0" width="690" height="510" src="{{ site.baseurl }}/code_samples/wind-arrows.html"></iframe>
+
+Let's see the most important parts for the Canvas version. You can find [the whole code here]({{ site.baseurl }}/code_samples/wind-arrows-page.html)
+
+{% highlight js %}
+var tiff = GeoTIFF.parse(tiffData.response);
+var image = tiff.getImage();
+var rasters = image.readRasters();
+var tiepoint = image.getTiePoints()[0];
+var pixelScale = image.getFileDirectory().ModelPixelScale;
+var geoTransform = [tiepoint.x, pixelScale[0], 0, tiepoint.y, 0, -1*pixelScale[1]];
+
+var uData = new Array(image.getHeight());
+var vData = new Array(image.getHeight());
+var spdData = new Array(image.getHeight());
+var maxSpd = 0;
+for (var j = 0; j<image.getHeight(); j++){
+    uData[j] = new Array(image.getWidth());
+    vData[j] = new Array(image.getWidth());
+    spdData[j] = new Array(image.getWidth());
+    for (var i = 0; i<image.getWidth(); i++){
+        uData[j][i] = rasters[0][i + j*image.getWidth()];
+        vData[j][i] = rasters[1][i + j*image.getWidth()];
+        spdData[j][i] = 1.943844492 * Math.sqrt(uData[j][i]*uData[j][i] + vData[j][i]*vData[j][i]);
+        if (spdData[j][i]>maxSpd){
+          maxSpd = spdData[j][i];
+        }
+    }
+}
+{% endhighlight %}
+
+* The GeoTIFF data is read as explained in the [reading a raster]({{ site.baseurl }}{% post_url 2016-12-07-reading-raster-data %}) page
+* Note that the *maxSpd* is the maximum speed, calculated to make an authomatic color and size scale. If not, many colors should be used
+
+{% highlight js %}
+var colorScale = d3.scaleSequential(d3.interpolateBuPu)
+    .domain([0, maxSpd]);
+var sizeScale = d3.scaleLinear()
+    .domain([0, maxSpd])
+    .range([0.5, 1.3]);
+{% endhighlight %}
+
+* Scales for color and size are set
+  * See how the color scales work at the [color scales]({{ site.baseurl }}{% post_url 2016-12-09-color-scales %}) page
+* The size goes from *0.5* to *1.3*, which are the scale factors
+  * If the minumum was zero, small speeds would be difficult to see
+  * The maximum is bigger than *1*, since most of the arrows will be much smaller
+  * The length or area of the arrows aren't proportional to speed, which isn't nice
+
+{% highlight js %}
+var xPos = d3.range(arrowSize, width, arrowSize);
+var yPos = d3.range(arrowSize, height, arrowSize);
+
+xPos.forEach(function(x){
+  yPos.forEach(function(y){
+{% endhighlight %}
+
+* [d3.range](https://github.com/d3/d3-array/blob/master/README.md#range) returns an array of positions from 0 to the image size, each *barbSize* pixels. Very convenient in our case
+* For each of these positions in the output image, an arrow will be calculated
+
+{% highlight js %}
+    var coords = projection.invert([x,y]);
+    var px = Math.round((coords[0] - geoTransform[0]) / geoTransform[1]);
+    var py = Math.round((coords[1] - geoTransform[3]) / geoTransform[5]);
+{% endhighlight %}
+
+* From the image pixel position to a lat-lon position, the *projection.invert* method must be used
+* The [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-07-geotransform %}) is applied to get the pixel position in the original GeoTIFF file
+
+{% highlight js %}
+var angle = Math.atan2(-vData[py][px],uData[py][px]);
+var spd = spdData[py][px];
+{% endhighlight %}
+
+* The wind direction is calculated with the [atan2](https://en.wikipedia.org/wiki/Atan2) function, but changing the axis order and the y-axis sign so the 0 degrees start from the north and the original wind speed goes from south to north when positive
+  * Check the [example image]({{ site.baseurl }}/code_samples/wind-barbs-page.html) to see that the result is correct
+
+{% highlight js %}
+context.save();
+context.translate(x, y);
+context.rotate(angle);
+context.scale(sizeScale(spd), sizeScale(spd));
+{% endhighlight %}
+
+* The most important thing to note is which functions are used to set size, direction and position of the arrows
+  * *context.translate()* sets the position (origin) to the arrow position. All coordinates will have this origin now
+  * *context.rotate()* rotates the arrow to the proper direction
+  * *context.scale()* will set the size
+* *context.save()* and *context.restore()* make the transformations to start again from the original setting every time
+
+{% highlight js %}
+context.moveTo(-arrowSize/2,0);
+context.lineTo(arrowSize/5,arrowSize/6);
+context.lineTo(arrowSize/5,arrowSize/3);
+context.lineTo(arrowSize/2,0);
+context.lineTo(arrowSize/5,-arrowSize/3);
+context.lineTo(arrowSize/5,-arrowSize/6);
+context.lineTo(-arrowSize/2,0);
+
+context.stroke();
+context.fill();
+context.restore();
+{% endhighlight %}
+
+* The arrow is drawn always with the same size and from left to right, using the [Canvas methods](http://www.w3schools.com/tags/ref_canvas.asp)
+* *context.restore()* prepares the Canvas for the next iteration
+
+### SVG version
+
+You can find [the whole code here]({{ site.baseurl }}/code_samples/wind-arrows-svg-page.html)
+
+* This version is more or less like the Canvas one. The main difference is in this section of code
+
+{% highlight js %}
+var angle = (180/Math.PI) * Math.atan2(-vData[py][px],uData[py][px]);
+var spd = spdData[py][px];
+svg.append("path")
+  .attr("d", "M"+-arrowSize/2+",0L"+arrowSize/5+","+arrowSize/6+"L"+arrowSize/5+","+arrowSize/3+"L"+arrowSize/2+",0L"+arrowSize/5+","+(-arrowSize/3)+"L"+arrowSize/5+","+(-arrowSize/6)+"Z")
+  .style("fill", colorScale(spd))
+  .style("stroke", "#444")
+  .attr("transform", "translate("+x+", "+y+")rotate("+angle+")scale("+sizeScale(spd)+")");
+{% endhighlight %}
+
+* The arrow is drawn using an [SVG path](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths) instead of line by line
+* SVG can handle the transformations in an easier way. So those are applied to each element with the transform attribute
 
 Barbs
 -----

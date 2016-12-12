@@ -94,7 +94,7 @@ d3.json("world-110m.json", function(error, topojsonData) {
         .attr("d", "M"+-arrowSize/2+",0L"+arrowSize/5+","+arrowSize/6+"L"+arrowSize/5+","+arrowSize/3+"L"+arrowSize/2+",0L"+arrowSize/5+","+(-arrowSize/3)+"L"+arrowSize/5+","+(-arrowSize/6)+"Z")
         .style("fill", colorScale(spd))
         .style("stroke", "#444")
-        .attr("transform", "translate("+x+", "+y+")rotate("+angle+")scale("+sizeScale(spd)+")");;
+        .attr("transform", "translate("+x+", "+y+")rotate("+angle+")scale("+sizeScale(spd)+")");
     });
   });
 
