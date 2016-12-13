@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+</style>
+<body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="geotiff.min.js"></script>
+<script src="raster-marching-squares.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+<script>
+var width = 680,
+    height = 500;
+var projection = d3.geoAzimuthalEqualArea()
+    .rotate([-55.5, -24])
+    .scale(1100);
+
+var canvas = d3.select("body").append("canvas")
+    .attr("width", width)
+    .attr("height", height);
+
+var context = canvas.node().getContext("2d");
+d3.request("tz850.tiff")
+  .responseType('arraybuffer')
+  .get(function(error, tiffData){
+d3.json("world-110m.json", function(error, topojsonData) {
+  var countries = topojson.feature(topojsonData, topojsonData.objects.countries);
+  var path = d3.geoPath()
+      .projection(projection).context(context);
+
+  var tiff = GeoTIFF.parse(tiffData.response);
+  var image = tiff.getImage();
+  var rasters = image.readRasters();
+  var tiepoint = image.getTiePoints()[0];
+  var pixelScale = image.getFileDirectory().ModelPixelScale;
+  var geoTransform = [tiepoint.x, pixelScale[0], 0, tiepoint.y, 0, -1*pixelScale[1]];
+
+  var zData = new Array(image.getHeight());
+  for (var j = 0; j<image.getHeight(); j++){
+      zData[j] = new Array(image.getWidth());
+      for (var i = 0; i<image.getWidth(); i++){
+          zData[j][i] = rasters[0][i + j*image.getWidth()];
+      }
+  }
+
+  context.beginPath();
+  context.strokeStyle = "#000";
+  context.fillStyle = "#aaa";
+  context.lineWidth = 1.5;
+  context.globalAlpha = 0.5;
+  path(countries);
+  context.stroke();
+  context.fill();
+
+  var intervalsZ = [1400, 1420, 1440, 1460, 1480, 1500, 1520, 1540];
+  var bandsTemp = rastertools.isolines(zData, geoTransform, intervalsZ);
+  var colorScale = d3.scaleSequential(d3.interpolateYlOrRd)
+      .domain([1400, 1540]);
+  bandsTemp.features.forEach(function(d, i) {
+      context.beginPath();
+      context.globalAlpha = 1;
+      context.lineWidth = 2;
+      context.strokeStyle = colorScale(intervalsZ[i]);
+      path(d);
+      context.stroke();
+  });
+
+});
+});
+</script>
+
+</body>
