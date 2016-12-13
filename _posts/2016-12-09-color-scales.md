@@ -7,6 +7,8 @@ disqus: 1
 ---
 When drawing lines or areas, we usually want to color them depending on the value they represent.
 
+To get nice already made color scales, you can check [ColorBrewer2](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths) or [cpt-city](http://soliton.vm.bytemark.co.uk/pub/cpt-city/).
+
 D3js
 ----
 D3js provides (of course) an easy way to create color scales, called [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic). Many color scales are already created, and accessing to their colors is easy:
