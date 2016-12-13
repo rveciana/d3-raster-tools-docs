@@ -61,3 +61,37 @@ lines.features.forEach(function(d) {
   * The streamline is written with the direction of the wind directly
   * There is a [parameter to change it](https://github.com/rvec(iana/raster-streamlines) called *flip*
 * The arrows are drawn using the basic [Canvas lineTo function](http://www.w3schools.com/tags/canvas_lineto.asp)
+
+### SVG
+
+Of course, it's possible to get the same result but using SVG instead of Canvas.
+
+You can find [the whole code here]({{ site.baseurl }}/code_samples/streamlines-arrows-svg-page.html)
+
+The important part is:
+
+{% highlight js %}
+var lines = rastertools.streamlines(uData,vData, geoTransform);
+lines.features.forEach(function(d) {
+  var properties = spp.svgPathProperties(path(d));
+  var arrowPos = properties.getPropertiesAtLength(properties.getTotalLength()/2);
+  var arrowDegrees = Math.atan(arrowPos.tangentY/arrowPos.tangentX);
+
+  svg.insert("path", ".streamline")
+      .datum(d)
+      .attr("d", path)
+      .style("fill", "None")
+      .style("stroke", "#777");
+
+  svg.insert("path", ".streamline")
+      .attr("d", "M"+arrowPos.x+","+arrowPos.y
+            +"L"+(arrowPos.x-10*arrowPos.tangentX + 6*arrowPos.tangentY)+","+(arrowPos.y-10*arrowPos.tangentY - 6*arrowPos.tangentX)
+            +"M"+arrowPos.x+","+arrowPos.y
+            +"L"+(arrowPos.x-10*arrowPos.tangentX - 6*arrowPos.tangentY)+","+(arrowPos.y-10*arrowPos.tangentY + 6*arrowPos.tangentX))
+      .style("fill", "None")
+      .style("stroke", "#777");
+});
+{% endhighlight %}
+
+* The stramline is inserted directly, since is an SVG paths
+* To create the small arrow, an [SVG path](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths) is used wint lineTo and moveTo instructions

@@ -45,6 +45,7 @@ for (var j = 0; j<image.getHeight(); j++){
 {% endhighlight %}
 
 * The GeoTIFF data is read as explained in the [reading a raster]({{ site.baseurl }}{% post_url 2016-12-07-reading-raster-data %}) page
+* Note that the speed is converted from *m/s* to knots multiplying by 1.94
 * Note that the *maxSpd* is the maximum speed, calculated to make an authomatic color and size scale. If not, many colors should be used
 
 {% highlight js %}
