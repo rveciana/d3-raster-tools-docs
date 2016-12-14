@@ -18,18 +18,18 @@ var projection = d3.geoAzimuthalEqualArea()
     .rotate([-55.5, -24])
     .scale(1100);
 
-var canvas = d3.select("body").append("canvas")
+var path = d3.geoPath()
+    .projection(projection);
+
+var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-var context = canvas.node().getContext("2d");
 d3.request("tz850.tiff")
   .responseType('arraybuffer')
   .get(function(error, tiffData){
 d3.json("world-110m.json", function(error, topojsonData) {
   var countries = topojson.feature(topojsonData, topojsonData.objects.countries);
-  var path = d3.geoPath()
-      .projection(projection).context(context);
 
   var tiff = GeoTIFF.parse(tiffData.response);
   var image = tiff.getImage();
@@ -46,27 +46,26 @@ d3.json("world-110m.json", function(error, topojsonData) {
       }
   }
 
-  context.beginPath();
-  context.strokeStyle = "#000";
-  context.fillStyle = "#aaa";
-  context.lineWidth = 1.5;
-  context.globalAlpha = 0.5;
-  path(countries);
-  context.stroke();
-  context.fill();
-
   var intervalsZ = [1400, 1420, 1440, 1460, 1480, 1500, 1520, 1540];
-  var bandsZ = rastertools.isolines(zData, geoTransform, intervalsZ);
+  var linesZ = rastertools.isobands(zData, geoTransform, intervalsZ);
   var colorScale = d3.scaleSequential(d3.interpolateYlOrRd)
       .domain([1400, 1540]);
-  bandsZ.features.forEach(function(d, i) {
-      context.beginPath();
-      context.globalAlpha = 1;
-      context.lineWidth = 2;
-      context.strokeStyle = colorScale(intervalsZ[i]);
-      path(d);
-      context.stroke();
+  linesZ.features.forEach(function(d, i) {
+    svg.insert("path", ".streamline")
+        .datum(d)
+        .attr("d", path)
+        .style("stroke", colorScale(intervalsZ[i]))
+        .style("stroke-width", "2px")
+        .style("fill", "None");
   });
+
+  svg.insert("path", ".map")
+      .datum(countries)
+      .attr("d", path)
+      .style("opacity", "0.4")
+      .style("fill", "#ccc")
+      .style("stroke", "#777")
+      .style("stroke-width", "1.5px");
 
 });
 });
