@@ -58,7 +58,7 @@ d3.json("world-110m.json", function(error, topojsonData) {
   }
 
   var intervalsZ = [1400, 1420, 1440, 1460, 1480, 1500, 1520, 1540];
-  var linesZ = rastertools.isobands(zData, geoTransform, intervalsZ);
+  var linesZ = rastertools.isolines(zData, geoTransform, intervalsZ);
   var colorScale = d3.scaleSequential(d3.interpolateYlOrRd)
       .domain([1400, 1540]);
   linesZ.features.forEach(function(d, i) {
