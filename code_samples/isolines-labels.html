@@ -8,6 +8,7 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="geotiff.min.js"></script>
 <script src="raster-marching-squares.min.js"></script>
+<script src="path-properties.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 
@@ -28,8 +29,6 @@ d3.request("tz850.tiff")
   .get(function(error, tiffData){
 d3.json("world-110m.json", function(error, topojsonData) {
   var countries = topojson.feature(topojsonData, topojsonData.objects.countries);
-  var path = d3.geoPath()
-      .projection(projection).context(context);
 
   var tiff = GeoTIFF.parse(tiffData.response);
   var image = tiff.getImage();
@@ -46,6 +45,9 @@ d3.json("world-110m.json", function(error, topojsonData) {
       }
   }
 
+  var path = d3.geoPath()
+      .projection(projection).context(context);
+
   context.beginPath();
   context.strokeStyle = "#000";
   context.fillStyle = "#aaa";
@@ -55,18 +57,55 @@ d3.json("world-110m.json", function(error, topojsonData) {
   context.stroke();
   context.fill();
 
+  //Creating the isolines in a separate hidden canvas
+  var hiddenCanvas = d3.select("body").append("canvas")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("id", "hiddenCanvas")
+        .style("display","none");
+  var hiddenContext = hiddenCanvas.node().getContext("2d");
+
+  var hiddenPath = d3.geoPath()
+      .projection(projection).context(hiddenContext);
+  var hiddenPath2 = d3.geoPath()
+          .projection(projection);
+
   var intervalsZ = [1400, 1420, 1440, 1460, 1480, 1500, 1520, 1540];
   var linesZ = rastertools.isolines(zData, geoTransform, intervalsZ);
   var colorScale = d3.scaleSequential(d3.interpolateYlOrRd)
       .domain([1400, 1540]);
   linesZ.features.forEach(function(d, i) {
-      context.beginPath();
-      context.globalAlpha = 1;
-      context.lineWidth = 2;
-      context.strokeStyle = colorScale(intervalsZ[i]);
-      path(d);
-      context.stroke();
+      hiddenContext.beginPath();
+      hiddenContext.globalAlpha = 1;
+      hiddenContext.lineWidth = 2;
+      hiddenContext.strokeStyle = colorScale(intervalsZ[i]);
+      hiddenPath(d);
+      hiddenContext.stroke();
+      //Drawing labels
+      var properties = spp.svgPathProperties(hiddenPath2(d));
+      var separation = 150;
+
+      for(var j = 0; j< Math.floor(properties.getTotalLength()/separation); j++){
+        var pos = properties.getPropertiesAtLength(75 + separation*j);
+
+        var degrees = Math.atan(pos.tangentY/pos.tangentX);
+        var text = d.properties[0].value;
+        hiddenContext.save();
+
+        hiddenContext.translate(pos.x, pos.y);
+        hiddenContext.rotate(degrees);
+
+        hiddenContext.font="15px Georgia";
+
+        hiddenContext.clearRect(-2-hiddenContext.measureText(text).width/2 , -8, 4 + hiddenContext.measureText(text).width, 19);
+        hiddenContext.fillStyle = "#500";
+    		hiddenContext.fillText(text, -hiddenContext.measureText(text).width/2, 7.5);
+        hiddenContext.restore();
+      }
   });
+
+  //Merging the hidden canvas
+  context.drawImage(hiddenCanvas.node(), 0, 0, width, height);
 
 });
 });
