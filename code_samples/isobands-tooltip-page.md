@@ -4,7 +4,7 @@ title: "Drawing isobands"
 ---
 Drawing isobands
 ----------------
-Canvas example from the [tooltips]({{ site.baseurl }}{% post_url 2016-12-15-tooltips %}) section. Click on any part of the image to see the GeoTIFF value on a tooltip
+Canvas example from the [tooltips]({{ site.baseurl }}{% post_url 2016-12-01-tooltips %}) section. Click on any part of the image to see the GeoTIFF value on a tooltip
 
 <iframe frameborder="no" border="0" scrolling="no" marginwidth="0" marginheight="0" width="690" height="510" src="{{ site.baseurl }}/code_samples/isobands-tooltip.html"></iframe>
 

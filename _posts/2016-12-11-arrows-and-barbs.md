@@ -44,7 +44,7 @@ for (var j = 0; j<image.getHeight(); j++){
 }
 {% endhighlight %}
 
-* The GeoTIFF data is read as explained in the [reading a raster]({{ site.baseurl }}{% post_url 2016-12-07-reading-raster-data %}) page
+* The GeoTIFF data is read as explained in the [reading a raster]({{ site.baseurl }}{% post_url 2016-12-31-reading-raster-data %}) page
 * Note that the speed is converted from *m/s* to knots multiplying by 1.94
 * Note that the *maxSpd* is the maximum speed, calculated to make an authomatic color and size scale. If not, many colors should be used
 
@@ -81,7 +81,7 @@ xPos.forEach(function(x){
 {% endhighlight %}
 
 * From the image pixel position to a lat-lon position, the *projection.invert* method must be used
-* The [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-07-geotransform %}) is applied to get the pixel position in the original GeoTIFF file
+* The [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-30-geotransform %}) is applied to get the pixel position in the original GeoTIFF file
 
 {% highlight js %}
 var angle = Math.atan2(-vData[py][px],uData[py][px]);
@@ -166,7 +166,7 @@ var py = Math.round((coords[1] - geoTransform[3]) / geoTransform[5]);
 {% endhighlight %}
 
 * From the image pixel position to a lat-lon position, the *projection.invert* method must be used
-* The [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-07-geotransform %}) is applied to get the pixel position in the original GeoTIFF file
+* The [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-30-geotransform %}) is applied to get the pixel position in the original GeoTIFF file
 
 {% highlight js %}
 var angle = Math.atan2(-vData[py][px],uData[py][px]);

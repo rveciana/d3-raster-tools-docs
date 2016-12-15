@@ -14,7 +14,7 @@ Calculating these streamlines is not so easy, so I made [this library](https://g
 
 You can find [the whole code here]({{ site.baseurl }}/code_samples/streamlines-page.html)
 
-Basically, after [reading the GeoTIFF data]({{ site.baseurl }}{% post_url 2016-12-07-reading-raster-data %}), the code is
+Basically, after [reading the GeoTIFF data]({{ site.baseurl }}{% post_url 2016-12-31-reading-raster-data %}), the code is
 
 {% highlight js %}
 var lines = rastertools.streamlines(uData,vData, geoTransform);

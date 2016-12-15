@@ -2,7 +2,7 @@
 layout: page
 title: "GeoTransform"
 category: intr
-date: 2016-12-07 18:19:49
+date: 2016-12-30 18:19:49
 disqus: 1
 ---
 In all the examples and functions the word *GeoTransform* will appear. It's a word that doesn't appear when talking about vectorial data. A *raster band* is a two dimension matrix with the magnitude value at each position or pixel. Since it's geographical data, each pixel is located somewhere on the Globe. The formula that converts the pixel position on the matrix to the map coordinates is called the *GeoTransform*.

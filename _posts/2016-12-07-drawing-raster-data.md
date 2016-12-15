@@ -6,7 +6,7 @@ date: 2016-12-07 17:17:40
 disqus: 1
 ---
 
-When [reading a raster]({{ site.baseurl }}{% post_url 2016-12-07-reading-raster-data %}), the result is a matrix with the value for each pixel. With this data, the simplest thing to do is drawing the value of each pixel.
+When [reading a raster]({{ site.baseurl }}{% post_url 2016-12-31-reading-raster-data %}), the result is a matrix with the value for each pixel. With this data, the simplest thing to do is drawing the value of each pixel.
 
 To draw them, only the *canvas* option is available for performance reasons, since the amount of pixels is usually very high.
 
@@ -29,7 +29,7 @@ d3.request("tz850.tiff")
   .get(function(error, tiffData){
 d3.json("world-110m.json", function(error, topojsonData) {
 {% endhighlight %}
-* Note that, as explained in the [reading a raster]({{ site.baseurl }}{% post_url 2016-12-07-reading-raster-data %}) page, the request is a bit different for the GeoTIFF
+* Note that, as explained in the [reading a raster]({{ site.baseurl }}{% post_url 2016-12-31-reading-raster-data %}) page, the request is a bit different for the GeoTIFF
 {% highlight js %}
   var tiff = GeoTIFF.parse(tiffData.response);
   var image = tiff.getImage();
@@ -47,7 +47,7 @@ d3.json("world-110m.json", function(error, topojsonData) {
       }
   }
 {% endhighlight %}
-* The GeoTIFF is read as explained in the [reading a raster]({{ site.baseurl }}{% post_url 2016-12-07-reading-raster-data %}) page
+* The GeoTIFF is read as explained in the [reading a raster]({{ site.baseurl }}{% post_url 2016-12-31-reading-raster-data %}) page
 
 {% highlight js %}
   var cs_def = {positions:[0, 0.25, 0.5, 0.75, 1], colors:["#0571b0", "#92c5de", "#f7f7f7", "#f4a582", "#ca0020"]};
@@ -110,7 +110,7 @@ This is the actual drawing part:
   * *var data* has the pixel values of this new created canvas. The array has four elements for each pixel to represent the RGBA values. It's the fastest way to draw an image, much more than drawing small rectangles
 * The iteration is for each pixel in the output canvas, not the original GeoTIFF matrix
   * To get the position in the values matrix, the output projection must be transformed to lat-lon using *projection.invert*
-  * Since the GeiTIFF is already in latlon, apply the [inverse GeoTransform]({{ site.baseurl }}{% post_url 2016-12-07-geotransform %}) to get the position in the values matrix
+  * Since the GeiTIFF is already in latlon, apply the [inverse GeoTransform]({{ site.baseurl }}{% post_url 2016-12-30-geotransform %}) to get the position in the values matrix
   * We want to represent the original pixels, in this example, so the pixel position is rounded to get the nearest pixel in the values matrix
 * The color to use is calculated with the method explained in the [color scales]({{ site.baseurl }}{% post_url 2016-12-09-color-scales %}) page
 

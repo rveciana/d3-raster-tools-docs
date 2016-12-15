@@ -79,7 +79,7 @@ coords = proj4(firstProjection).forward(coords);
 * For each barb position, the iteration will give us the x and y pixel positions on the map
 * *projection.invert([x,y])* will transform this position into lon-lat
 * *proj4().forward()* will project this lon-lat to the original projection coordinates
-* Then the [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-07-geotransform %}) can be applied as usual, since it will be in the original coordinates too
+* Then the [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-30-geotransform %}) can be applied as usual, since it will be in the original coordinates too
 
 Project a single image
 ----------------------

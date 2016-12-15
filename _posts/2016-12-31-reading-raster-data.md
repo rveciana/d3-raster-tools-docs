@@ -2,11 +2,11 @@
 layout: page
 title: "Reading raster data"
 category: intr
-date: 2016-12-07 18:04:19
+date: 2016-12-31 18:04:19
 disqus: 1
 ---
 
-All this documentation is about representing raster data. In GIS, a [raster](https://en.wikipedia.org/wiki/Raster_graphics#Geographic_information_systems) is basically a 2-dimension matrix with the value of a magnitude in each point. The position over the Globe for each pixel (or matrix position) is given by the [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-07-geotransform %}), and those positions are in a specific [projection]({{ site.baseurl }}{% post_url 2016-12-01-projections %}).
+All this documentation is about representing raster data. In GIS, a [raster](https://en.wikipedia.org/wiki/Raster_graphics#Geographic_information_systems) is basically a 2-dimension matrix with the value of a magnitude in each point. The position over the Globe for each pixel (or matrix position) is given by the [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-30-geotransform %}), and those positions are in a specific [projection]({{ site.baseurl }}{% post_url 2016-12-01-projections %}).
 
 There are different ways to use a 2D matrix in JavaScript, and here I'll be using the easiest one, an array of arrays. So, if the data is in a 1D array, can be transformed by:
 
@@ -53,7 +53,7 @@ d3.request("tz850.tiff")
 * Note that the GeoTIFF file data must be read as an [arraybuffer](https://developer.mozilla.org/ca/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
   * If you don't want to use d3js, try [this option](https://github.com/constantinius/geotiff.js#usage)
 * The example file has two layers (or bands). In the example, we want the second one, that represents temperature, so *rasters[1]* is the actual array to be processed
-* The example shows how to calculate the [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-07-geotransform %}) and the inverse geotransform (how to calculate the pixel from the geographic coordinates)
+* The example shows how to calculate the [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-30-geotransform %}) and the inverse geotransform (how to calculate the pixel from the geographic coordinates)
 
 If used from nodejs, the form to read the file is slightly different, since the *fs* functions are used:
 
