@@ -74,7 +74,6 @@ d3.json("world-110m.json", function(error, topojsonData) {
 
   var intervalsSpd = [0, 5, 10, 15, 20, 25, 30, 35, 40];
   var bandsSpd = rastertools.isobands(spdData, geoTransform, intervalsSpd);
-  //console.info(image.getGeoKeys());
   var firstProjection='PROJCS["unnamed",\
     GEOGCS["unnamed ellipse",\
         DATUM["unknown",\
