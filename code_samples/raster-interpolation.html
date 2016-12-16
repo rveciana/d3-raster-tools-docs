@@ -59,7 +59,7 @@ d3.json("world-110m.json", function(error, topojsonData) {
   var canvasColorScale = d3.select("body").append("canvas")
       .attr("width", scaleWidth)
       .attr("height", 1)
-      ;//.style("display","none");
+      .style("display","none");
   var contextColorScale = canvasColorScale.node().getContext("2d");
   var gradient = contextColorScale.createLinearGradient(0, 0, scaleWidth, 1);
 
@@ -88,13 +88,24 @@ d3.json("world-110m.json", function(error, topojsonData) {
       var px = invGeoTransform[0] + pointCoords[0]* invGeoTransform[1];
       var py = invGeoTransform[3] + pointCoords[1] * invGeoTransform[5];
 
+      var value;
       if(Math.floor(px) >= 0 && Math.ceil(px) < image.getWidth() && Math.floor(py) >= 0 && Math.ceil(py) < image.getHeight()){
         //https://en.wikipedia.org/wiki/Bilinear_interpolation
-        var value = tempData[Math.floor(py)][Math.floor(px)]*(Math.ceil(px)-px)*(Math.ceil(py)-py)+
-        tempData[Math.floor(py)][Math.ceil(px)]*(px-Math.floor(px))*(Math.ceil(py)-py) +
-        tempData[Math.ceil(py)][Math.floor(px)]*(Math.ceil(px)-px)*(py-Math.floor(py)) +
-        tempData[Math.ceil(py)][Math.ceil(px)]*(px-Math.floor(px))*(py-Math.floor(py));
-
+        var dist1 = (Math.ceil(px)-px)*(Math.ceil(py)-py);
+        var dist2 = (px-Math.floor(px))*(Math.ceil(py)-py);
+        var dist3 = (Math.ceil(px)-px)*(py-Math.floor(py));
+        var dist4 = (px-Math.floor(px))*(py-Math.floor(py));
+        if (dist1 != 0 || dist2!=0 || dist3!=0 || dist4!=0){
+          value = tempData[Math.floor(py)][Math.floor(px)]*dist1+
+          tempData[Math.floor(py)][Math.ceil(px)]*dist2 +
+          tempData[Math.ceil(py)][Math.floor(px)]*dist3 +
+          tempData[Math.ceil(py)][Math.ceil(px)]*dist4;
+        } else {
+          value = spdData[Math.floor(py)][Math.floor(px)];
+        }
+      } else {
+        value = -999;
+      }
         var c = Math.round((scaleWidth-1) * ((value - 14)/24));
         var alpha = 200;
         if (c<0 || c > (scaleWidth-1)){
@@ -105,7 +116,7 @@ d3.json("world-110m.json", function(error, topojsonData) {
         data[pos+2]   = csImageData[c*4+2];
         data[pos+3]   = alpha;
         pos = pos + 4
-      }
+
     }
   }
   contextRaster.putImageData( id, 0, 0);
