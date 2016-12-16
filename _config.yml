@@ -6,8 +6,8 @@ subtitle: 'Draw raster data using D3js in the browser or nodejs'
 disqus_shortname: 'geoexamples'
 
 # if you use google analytics, add your tracking id here
-#google_analytics_id: 'UA-36383259-2'
-google_analytics_id: ''
+google_analytics_id: 'UA-36383259-2'
+#google_analytics_id: ''
 
 # Enable/show navigation. There are there options:
 #   0 - always hide
