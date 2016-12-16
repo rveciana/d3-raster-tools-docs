@@ -81,6 +81,48 @@ coords = proj4(firstProjection).forward(coords);
 * *proj4().forward()* will project this lon-lat to the original projection coordinates
 * Then the [GeoTransform]({{ site.baseurl }}{% post_url 2016-12-30-geotransform %}) can be applied as usual, since it will be in the original coordinates too
 
+Projected raster to interpolated raster
+---------------------------------------
+Creating [this kind of visualization]({{ site.baseurl }}/code_samples/raster-interpolation-page.html) from a projected GeoTIFF is also possible:
+
+<iframe frameborder="no" border="0" scrolling="no" marginwidth="0" marginheight="0" width="690" height="510" src="{{ site.baseurl }}/code_samples/raster-interpolation-projected.html"></iframe>
+
+You can find [the whole code here]({{ site.baseurl }}/code_samples/raster-interpolation-projected-page.html).
+
+{% highlight js %}
+var geoTIFFProjection = proj4('PROJCS["unnamed",\
+  GEOGCS["unnamed ellipse",\
+      DATUM["unknown",\
+          SPHEROID["unnamed",6370997,0]],\
+      PRIMEM["Greenwich",0],\
+      UNIT["degree",0.0174532925199433]],\
+  PROJECTION["Lambert_Conformal_Conic_2SP"],\
+  PARAMETER["standard_parallel_1",30],\
+  PARAMETER["standard_parallel_2",60],\
+  PARAMETER["latitude_of_origin",34.83158],\
+  PARAMETER["central_meridian",-98],\
+  PARAMETER["false_easting",0],\
+  PARAMETER["false_northing",0],\
+  UNIT["metre",1,\
+      AUTHORITY["EPSG","9001"]]]');  // WGS84 to projection defined in `wkt`
+{% endhighlight %}
+
+* The projection function is stored into a variable to speed the next process
+  * The WKT of the projection is get as in the other case
+
+{% highlight js %}
+var coords = projection.invert([i,j]);
+coords = geoTIFFProjection.forward(coords);
+
+var px = (coords[0] - geoTransform[0]) / geoTransform[1];
+var py = (coords[1] - geoTransform[3]) / geoTransform[5];
+{% endhighlight %}
+
+* To draw pixel by pixel, the loop is the same as in the [raster interpolation example]({{ site.baseurl }}/code_samples/raster-interpolation-page.html)
+* The difference is that the lon-lat coords given by d3js must be projected to the GeoTIFF projection with the function created before
+* The geoTransform will be in the projected coordinates, so it's used as usual
+* The speed is worse, of course, but it's still usable. It's important to use the *forward* method without creating the projectino every time (of course)
+
 Project a single image
 ----------------------
 
