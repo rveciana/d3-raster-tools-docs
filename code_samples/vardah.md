@@ -25,7 +25,7 @@ v = ds.GetRasterBand(51).ReadAsArray()
 corr_press = press * (1 - (0.0065*gph/(0.0065*gph + temp  + 273.15)))**-5.257
 
 driver = gdal.GetDriverByName('GTiff')
-outRaster = driver.Create("/tmp/gfs.tiff", ds.RasterXSize, ds.RasterYSize, 4, gdal.GDT_Float32)
+outRaster = driver.Create("/tmp/vardah.tiff", ds.RasterXSize, ds.RasterYSize, 4, gdal.GDT_Float32)
 outRaster.SetGeoTransform(ds.GetGeoTransform())
 
 outband = outRaster.GetRasterBand(1)
@@ -37,11 +37,11 @@ outband.WriteArray(temp)
 outband.SetMetadata({'name': 'temp'})
 
 outband = outRaster.GetRasterBand(3)
-outband.WriteArray(temp)
+outband.WriteArray(u)
 outband.SetMetadata({'name': 'u'})
 
 outband = outRaster.GetRasterBand(4)
-outband.WriteArray(temp)
+outband.WriteArray(v)
 outband.SetMetadata({'name': 'v'})
 
 outRasterSRS = osr.SpatialReference()
