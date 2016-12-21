@@ -1,9 +1,9 @@
 ---
 layout: default
-title: "Chosing layers and showing scales"
+title: "Choosing layers and showing scales"
 ---
-Chosing layers and showing scales
----------------------------------
+Choosing layers and showing scales
+----------------------------------
 Example showing the way to change the visible data layers.
 
 If you click on the image, the values for the pixel will be shown as explained in the [tooltips]({{ site.baseurl }}{% post_url 2016-12-01-tooltips %}) section.
