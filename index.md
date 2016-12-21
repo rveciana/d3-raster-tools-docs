@@ -23,8 +23,8 @@ And examples for all the common raster visualizations covered by the [Basemap li
 
 I would really appreciate all the feedback. Disqus comments are available on each page.
 
-Examples list
--------------
+Section Examples list
+---------------------
 
 |----------|:-------------:|
 |[<img src="{{ site.baseurl }}/images/examples/arrows.png" /> Wind arrows]({{ site.baseurl }}/code_samples/wind-arrows-page.html) | [<img src="{{ site.baseurl }}/images/examples/barbs.png" /> Wind barbs]({{ site.baseurl }}/code_samples/wind-barbs-page.html) |
@@ -32,3 +32,9 @@ Examples list
 |[<img src="{{ site.baseurl }}/images/examples/isolines.png" /> Isolines]({{ site.baseurl }}/code_samples/isolines-page.html) | [<img src="{{ site.baseurl }}/images/examples/isolines-labels.png" /> Isolines with labels]({{ site.baseurl }}/code_samples/isolines-labels-page.html) |
 |[<img src="{{ site.baseurl }}/images/examples/isobands.png" /> Isobands]({{ site.baseurl }}/code_samples/isobands-page.html) | [<img src="{{ site.baseurl }}/images/examples/streamlines.png" /> Streamlines]({{ site.baseurl }}/code_samples/streamlines-arrows-page.html) |
 |[<img src="{{ site.baseurl }}/images/examples/projection.png" /> Projected GeoTIFF]({{ site.baseurl }}/code_samples/wind-barbs-projected-page.html) | [<img src="{{ site.baseurl }}/images/examples/raster-interpolate-projection.png" /> Projected raster interpolation]({{ site.baseurl }}/code_samples/raster-interpolation-projected-page.html) |
+
+Other visualization examples
+----------------------------
+
+|----------|:-------------:|
+|[<img src="{{ site.baseurl }}/images/examples/vardah-layers.png" /> Layer selection]({{ site.baseurl }}/code_samples/vardah-layers-page.html) | [<img src="{{ site.baseurl }}/images/examples/vardah-streamlines.png" /> Animated streamlines]({{ site.baseurl }}/code_samples/vardah-streamlines-page.html) |

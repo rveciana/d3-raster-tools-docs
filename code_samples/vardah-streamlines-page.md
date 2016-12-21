@@ -1,0 +1,361 @@
+---
+layout: default
+title: "Animating streamlines"
+---
+Animating streamlines
+---------------------
+Example showing an animation over the streamlines. I put two versions, none of them satisfies me, but I wanted to show the idea...
+
+The color scales are drawn using the [d3-legend](http://d3-legend.susielu.com/) library by Susie Lu.
+
+The color scales are inspirated by the maps at [weatherbell.com](www.weatherbell.com).
+
+The data is from the GFS model for the Vardah cyclone. [See how the data was generated]({{ site.baseurl }}/code_samples/vardah.html).
+
+<iframe frameborder="no" border="0" scrolling="yes" marginwidth="0" marginheight="0" width="1050" height="510" src="{{ site.baseurl }}/code_samples/vardah-streamlines2.html"></iframe>
+[See only this example]({{ site.baseurl }}/code_samples/vardah-streamlines2.html) if the performance is poor.
+
+<iframe frameborder="no" border="0" scrolling="yes" marginwidth="0" marginheight="0" width="1050" height="510" src="{{ site.baseurl }}/code_samples/vardah-streamlines.html"></iframe>
+[See only this example]({{ site.baseurl }}/code_samples/vardah-streamlines.html) if the performance is poor.
+
+Code for the first example
+--------------------------
+
+{% highlight js %}
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="geotiff.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="raster-streamlines.min.js"></script>
+<script src="path-properties.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.19.0/d3-legend.min.js"></script>
+
+<script>
+var width = 680,
+    height = 500,
+    arrowSize = 30;
+
+var projection = d3.geoMercator()
+    .rotate([-81, -13])
+    .scale(2000)
+    .translate([width / 2, height / 2]);
+
+var canvas = d3.select("body").append("canvas")
+    .attr("width", width)
+    .attr("height", height);
+
+var context = canvas.node().getContext("2d");
+d3.request("vardah.tiff")
+  .responseType('arraybuffer')
+  .get(function(error, tiffData){
+d3.json("world-110m.json", function(error, topojsonData) {
+  var countries = topojson.feature(topojsonData, topojsonData.objects.countries);
+  var path = d3.geoPath()
+      .projection(projection).context(context);
+
+  var path2 = d3.geoPath()
+      .projection(projection);
+
+  var tiff = GeoTIFF.parse(tiffData.response);
+  var image = tiff.getImage();
+  var tiffWidth = image.getWidth();
+  var tiffHeight = image.getHeight();
+  var rasters = image.readRasters();
+  var tiepoint = image.getTiePoints()[0];
+  var pixelScale = image.getFileDirectory().ModelPixelScale;
+  var geoTransform = [tiepoint.x, pixelScale[0], 0, tiepoint.y, 0, -1*pixelScale[1]];
+
+  var uData = new Array(tiffHeight);
+  var vData = new Array(tiffHeight);
+  var spdData = new Array(tiffHeight);
+  var maxSpd = 0;
+  for (var j = 0; j<tiffHeight; j++){
+      uData[j] = new Array(tiffWidth);
+      vData[j] = new Array(tiffWidth);
+      spdData[j] = new Array(tiffWidth);
+      for (var i = 0; i<tiffWidth; i++){
+          uData[j][i] = rasters[2][i + j*tiffWidth];
+          vData[j][i] = rasters[3][i + j*tiffWidth];
+          spdData[j][i] = 1.943844492 * Math.sqrt(uData[j][i]*uData[j][i] + vData[j][i]*vData[j][i]);
+          if (spdData[j][i]>maxSpd){
+            maxSpd = spdData[j][i];
+          }
+      }
+  }
+  /*
+  var colorScale = d3.scaleSequential(d3.interpolateInferno)
+      .domain([0, maxSpd]);
+  */
+
+  var colorScale = d3.scaleThreshold()
+  .domain([8, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42,
+    44, 46, 48, 50, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96 ])
+  .range(["#ffffff", "#e5e5e6" , "#d1d1d1", "#bababa", "#979797", "#646464",
+          "#1464d3", "#1e6eeb", "#2883f1", "#3c97f5", "#50a5f5", "#78b9fb", "#97d3fb", "#b5f1fb", "#e1ffff",
+          "#0ea10e", "#1eb31e", "#36d33c", "#50ef50", "#78f572", "#97f58d", "#b5fbab", "#c9ffbf",
+          "#ffe978", "#ffc13c", "#ffa100", "#ff6000", "#ff3200", "#e11400", "#c10000", "#a50000",
+          "#643c32", "#785046", "#8d645a"]);
+
+  var sizeScale = d3.scaleLinear()
+      .domain([0, maxSpd])
+      .range([0.8, 2]);
+
+  var lines = rastertools.streamlines(uData,vData, geoTransform);
+  var distBetweenArrows = 100;
+  var speed = distBetweenArrows / 2000;
+  d3.timer(function(elapsed) {
+    context.fillStyle = "#def5ff";
+    context.rect(0, 0, width, height);
+    context.fill();
+    context.beginPath();
+    context.strokeStyle = "#777";
+    context.fillStyle = "#ede4d6";
+    path(countries);
+    context.fill();
+    context.stroke();
+
+    lines.features.forEach(function(d) {
+      var properties = spp.svgPathProperties(path2(d));
+      var totalLength = properties.getTotalLength();
+
+      context.beginPath();
+      context.strokeStyle = "#bbb";
+      path(d);
+      context.stroke();
+
+      if(totalLength>distBetweenArrows/3){
+        for(var i = 0; i < Math.ceil(totalLength / distBetweenArrows); i++){
+          var arrowLengthPos = i*distBetweenArrows + (speed*elapsed)%totalLength;
+
+          if(arrowLengthPos <= totalLength){
+            var arrowPos = properties.getPropertiesAtLength(arrowLengthPos);
+            var arrowDegrees = Math.atan(arrowPos.tangentY/arrowPos.tangentX);
+            var coords = projection.invert([arrowPos.x,arrowPos.y]);
+            var px = Math.round((coords[0] - geoTransform[0]) / geoTransform[1]);
+            var py = Math.round((coords[1] - geoTransform[3]) / geoTransform[5]);
+            if(px >= 0 && px < tiffWidth && py >= 0 && py < tiffHeight){
+              var size = sizeScale(spdData[py][px]);
+              context.strokeStyle = "#777";
+              context.fillStyle = colorScale(spdData[py][px]);
+              context.beginPath();
+              context.moveTo(arrowPos.x, arrowPos.y);
+              context.lineTo(arrowPos.x-size*10*arrowPos.tangentX + size*6*arrowPos.tangentY,arrowPos.y-size*10*arrowPos.tangentY - size*6*arrowPos.tangentX);
+              context.lineTo(arrowPos.x-size*6*arrowPos.tangentX ,arrowPos.y-size*6*arrowPos.tangentY);
+              context.lineTo(arrowPos.x-size*10*arrowPos.tangentX -size* 6*arrowPos.tangentY,arrowPos.y-size*10*arrowPos.tangentY + size*6*arrowPos.tangentX);
+              context.closePath();
+              context.fill();
+              context.stroke();
+            }
+          }
+        }
+      }
+
+    });
+  });
+
+var svg = d3.select("body").append("svg")
+  .attr("height", "500")
+  .style("font-size", "11px");
+
+var group = svg.append("g")
+  .attr("class", "legendThreshold")
+  .attr("transform", "translate(20,20)");
+
+var legend = d3.legendColor()
+    .labelFormat(d3.format("d"))
+    .labels(d3.legendHelpers.thresholdLabels)
+    .useClass(false)
+    .shapeHeight(11)
+    .title("Wind speed (kt)")
+    .scale(colorScale)
+
+group
+  .call(legend);
+
+
+});
+});
+
+
+</script>
+
+</body>
+{% endhighlight %}
+
+Code for the second example
+---------------------------
+
+{% highlight js %}
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="geotiff.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="raster-streamlines.min.js"></script>
+<script src="raster-marching-squares.min.js"></script>
+<script src="path-properties.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.19.0/d3-legend.min.js"></script>
+
+<script>
+var width = 680,
+    height = 500,
+    arrowSize = 30;
+
+var projection = d3.geoMercator()
+    .rotate([-81, -13])
+    .scale(2000)
+    .translate([width / 2, height / 2]);
+
+var canvas = d3.select("body").append("canvas")
+    .attr("width", width)
+    .attr("height", height);
+
+var context = canvas.node().getContext("2d");
+d3.request("vardah.tiff")
+  .responseType('arraybuffer')
+  .get(function(error, tiffData){
+d3.json("world-110m.json", function(error, topojsonData) {
+  var countries = topojson.feature(topojsonData, topojsonData.objects.countries);
+  var path = d3.geoPath()
+      .projection(projection).context(context);
+
+  var path2 = d3.geoPath()
+      .projection(projection);
+
+  var tiff = GeoTIFF.parse(tiffData.response);
+  var image = tiff.getImage();
+  var tiffWidth = image.getWidth();
+  var tiffHeight = image.getHeight();
+  var rasters = image.readRasters();
+  var tiepoint = image.getTiePoints()[0];
+  var pixelScale = image.getFileDirectory().ModelPixelScale;
+  var geoTransform = [tiepoint.x, pixelScale[0], 0, tiepoint.y, 0, -1*pixelScale[1]];
+
+  var uData = new Array(tiffHeight);
+  var vData = new Array(tiffHeight);
+  var spdData = new Array(tiffHeight);
+  var maxSpd = 0;
+  for (var j = 0; j<tiffHeight; j++){
+      uData[j] = new Array(tiffWidth);
+      vData[j] = new Array(tiffWidth);
+      spdData[j] = new Array(tiffWidth);
+      for (var i = 0; i<tiffWidth; i++){
+          uData[j][i] = rasters[2][i + j*tiffWidth];
+          vData[j][i] = rasters[3][i + j*tiffWidth];
+          spdData[j][i] = 1.943844492 * Math.sqrt(uData[j][i]*uData[j][i] + vData[j][i]*vData[j][i]);
+          if (spdData[j][i]>maxSpd){
+            maxSpd = spdData[j][i];
+          }
+      }
+  }
+
+  var colorScale = d3.scaleThreshold()
+  .domain([8, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42,
+    44, 46, 48, 50, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96 ])
+  .range(["#ffffff", "#e5e5e6" , "#d1d1d1", "#bababa", "#979797", "#646464",
+          "#1464d3", "#1e6eeb", "#2883f1", "#3c97f5", "#50a5f5", "#78b9fb", "#97d3fb", "#b5f1fb", "#e1ffff",
+          "#0ea10e", "#1eb31e", "#36d33c", "#50ef50", "#78f572", "#97f58d", "#b5fbab", "#c9ffbf",
+          "#ffe978", "#ffc13c", "#ffa100", "#ff6000", "#ff3200", "#e11400", "#c10000", "#a50000",
+          "#643c32", "#785046", "#8d645a"]);
+
+
+  var sizeScale = d3.scaleLinear()
+      .domain([0, maxSpd])
+      .range([0.8, 2]);
+
+  var lines = rastertools.streamlines(uData,vData, geoTransform);
+  var intervalsSpd = [0, 8, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42,
+    44, 46, 48, 50, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96 ];
+  var bands = rastertools.isobands(spdData, geoTransform, intervalsSpd);
+
+  var distBetweenArrows = 100;
+  var speed = distBetweenArrows / 2000;
+  d3.timer(function(elapsed) {
+    context.clearRect(0, 0, width, height);
+    context.beginPath();
+    context.strokeStyle = "#000";
+    context.fillStyle = "#aaa";
+    path(countries);
+    context.fill();
+    context.stroke();
+
+    bands.features.forEach(function(d, i) {
+      context.beginPath();
+      context.globalAlpha = 0.7;
+      context.fillStyle = colorScale(intervalsSpd[i]);
+      path(d);
+      context.fill();
+    });
+
+    lines.features.forEach(function(d) {
+      var properties = spp.svgPathProperties(path2(d));
+      var totalLength = properties.getTotalLength();
+
+
+      context.beginPath();
+      context.strokeStyle = "#aaa";
+      path(d);
+      context.stroke();
+      if(totalLength>distBetweenArrows/3){
+        for(var i = 0; i < Math.ceil(totalLength / distBetweenArrows); i++){
+          var arrowLengthPos = i*distBetweenArrows + (speed*elapsed)%totalLength;
+
+          if(arrowLengthPos <= totalLength){
+            var arrowPos = properties.getPropertiesAtLength(arrowLengthPos);
+            var arrowDegrees = Math.atan(arrowPos.tangentY/arrowPos.tangentX);
+            var coords = projection.invert([arrowPos.x,arrowPos.y]);
+            var px = Math.round((coords[0] - geoTransform[0]) / geoTransform[1]);
+            var py = Math.round((coords[1] - geoTransform[3]) / geoTransform[5]);
+            if(px >= 0 && px < tiffWidth && py >= 0 && py < tiffHeight){
+              var size = sizeScale(spdData[py][px]);
+              context.strokeStyle = "#666";
+              context.fillStyle = colorScale(spdData[py][px]);
+              context.beginPath();
+              context.moveTo(arrowPos.x, arrowPos.y);
+              context.lineTo(arrowPos.x-size*10*arrowPos.tangentX + size*6*arrowPos.tangentY,arrowPos.y-size*10*arrowPos.tangentY - size*6*arrowPos.tangentX);
+              context.lineTo(arrowPos.x-size*6*arrowPos.tangentX ,arrowPos.y-size*6*arrowPos.tangentY);
+              context.lineTo(arrowPos.x-size*10*arrowPos.tangentX -size* 6*arrowPos.tangentY,arrowPos.y-size*10*arrowPos.tangentY + size*6*arrowPos.tangentX);
+              context.closePath();
+              context.fill();
+              context.stroke();
+            }
+          }
+        }
+      }
+
+    });
+  });
+  var svg = d3.select("body").append("svg")
+    .attr("height", "500")
+    .style("font-size", "11px");
+
+  var group = svg.append("g")
+    .attr("class", "legendThreshold")
+    .attr("transform", "translate(20,20)");
+
+  var legend = d3.legendColor()
+      .labelFormat(d3.format("d"))
+      .labels(d3.legendHelpers.thresholdLabels)
+      .useClass(false)
+      .shapeHeight(11)
+      .title("Wind speed (kt)")
+      .scale(colorScale)
+
+  group
+    .call(legend);
+
+});
+});
+
+
+</script>
+
+</body>
+{% endhighlight %}
