@@ -1,3 +1,14 @@
+---
+layout: default
+title: "Using Leaflet"
+---
+Using Leaflet
+-------------
+Leaflet example from the [Leaflet section]({{ site.baseurl }}{% post_url 2016-12-13-isolines %}) section.
+
+<iframe frameborder="no" border="0" scrolling="no" marginwidth="0" marginheight="0" width="690" height="510" src="{{ site.baseurl }}/code_samples/leaflet.html"></iframe>
+
+{% highlight js %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -172,3 +183,4 @@ xhr.onload = function(e) {
 </script>
 </body>
 </html>
+{% endhighlight %}
