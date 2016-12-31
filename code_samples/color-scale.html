@@ -5,6 +5,7 @@
 </style>
 <body>
 <script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="color-scale.js"></script>
 <script>
 //colors:["#c9d5a6", "#7fa67a", "#976a2f", "#79750a", "#7ab5e3", "#fefefe"]
 
@@ -24,148 +25,26 @@ var svg = d3.select("body")
   .attr("width", 200)
   .attr("height", 500);
 
-var addGroup = svg.append("g")
-.attr("transform","translate(10, 10)")
-.on("click", function(){
-  var newValue = {value: 0, color: "#ffffff"};
-  scaleValues.push(newValue);
-  draw();
-  form(newValue);
-})
-
-addGroup.append("rect")
-.attr("width", squareWidth)
-.attr("height", squareHeight)
-.attr("x", 0)
-.attr("y", 0)
-.style("fill","#ddd")
-.style("stroke", "#666");
-
-addGroup.append("path")
-.attr("d", "m -4.5,-20.5 0,16 -16,0 0,7 16,0 0,16 7,0 0,-16 16,0 0,-7 -16,0 0,-16 -7,0 z")
-.attr("transform","translate("+squareWidth/2+","+squareHeight/2+") scale("+(0.6*squareHeight/40)+")")
-.style("stroke", "#666")
-.style("fill", "#ffffff");
-
-addGroup.append("text")
-.attr("x", squareWidth + squareWidth/8)
-.attr("y", 30*squareHeight/40)
-.style("fill", "#666")
-.style("font-size", (0.425*squareHeight)+"px")
-.style("font-family", "Verdana")
-.text("Add");
-
-
-function form(obj){
-  d3.selectAll(".form")
-    .remove();
-
-  var formDiv = d3.select("body")
-    .append("div")
-    .attr("class", "form");
-
-  formDiv.append("label")
-  .text("Value");
-
-  formDiv.append("input")
-  .attr("class", "valueField")
-  .attr("type", "number")
-  .attr("step", "any")
-  .attr("size", 10)
-  .attr("value", obj.value);
-
-  formDiv.append("label")
-  .text("Color");
-
-  formDiv.append("input")
-  .attr("class", "colorField")
-  .attr("type", "color")
-  .attr("value", obj.color);
-
-  formDiv.append("button")
-  .text("Set")
-  .on("click", function(){
-    scaleValues[scaleValues.indexOf(obj)] = {value: formDiv.select(".valueField").node().value,
-                                            color: formDiv.select(".colorField").node().value};
-    draw();
-    formDiv.transition()
-    .duration(1000)
-    .style("opacity", 0)
-    .remove();
+var scale = d3.ColorScaleChooser()
+  .squareWidth(50)
+  .scaleValues(scaleValues)
+  .on("change", function(d, min, max){
+    console.info("CHANGE", d, max, min);
+    var scaleWidth = 500;
+    d3.select("#colorScale").remove();
+    var canvasColorScale = d3.select("body").append("canvas")
+      .attr("id", "colorScale")
+      .attr("width", scaleWidth)
+      .attr("height", 20);
+    var contextColorScale = canvasColorScale.node().getContext("2d");
+    var gradient = contextColorScale.createLinearGradient(0, 0, scaleWidth, 1);
+    for (var i = 0; i < d.length; ++i) {
+      gradient.addColorStop((d[i].value-min)/(max-min), d[i].color);
+    }
+    contextColorScale.fillStyle = gradient;
+    contextColorScale.fillRect(0, 0, scaleWidth, 20);
   });
 
-
-}
-
-function draw(){
-  var colorSelection = svg.selectAll(".step")
-  .data(scaleValues.sort(function(a, b){
-      return a.value-b.value;
-  }), function(d) { return(d.value+d.color); });
-
-  var colorSelectionEnter = colorSelection
-  .enter()
-  .append("g")
-  .attr("class","step")
-  .attr("transform", function(d, i){return"translate(10, "+((i+1)*squareHeight*1.1 + 10)+")";})
-  .on("mouseover", function(d){
-    d3.select(this)
-      .selectAll(".close")
-      .style("visibility", "visible");
-  })
-  .on("mouseout", function(d){
-    d3.select(this)
-      .selectAll(".close")
-      .style("visibility", "hidden");
-  });
-
-  colorSelectionEnter.append("rect")
-  .attr("width", squareWidth)
-  .attr("height", squareHeight)
-  .attr("x", 0)
-  .attr("y", 0)
-  .style("fill",function(d){ return d.color})
-  .style("stroke", "#000")
-  .on("click", function(d){form(d);});
-
-
-
-  colorSelectionEnter.append("text")
-  .attr("x", squareWidth + squareWidth/8)
-  .attr("y", 30*squareHeight/40)
-  .style("fill", "#333")
-  .style("font-size", (0.425*squareHeight)+"px")
-  .style("font-family", "Verdana")
-  .text(function(d){return d.value});
-
-  colorSelectionEnter.append("path")
-  .attr("class", "close")
-  .attr("d", "m 20.5,1.86 a 20,20 0 0 0 -20,20 20,20 0 0 0 20,20 20,20 0 0 0 20,-20 20,20 0 0 0 -20,-20 z m -9.88,9 4.24,0 5.8,7.79 5.8,-7.79 4.23,0 -7.9,10.64 8.32,11.23 -4.23,0 -6.36,-8.59 -6.36,8.59 -4.23,0 8.49,-11.4 -7.77,-10.42 z")
-  .style("fill", "#f00")
-  .style("stroke", "#000")
-  .style("visibility", "hidden")
-  .attr("transform", "translate(3,3) scale(0.5)")
-  .on("click", function(d){
-    scaleValues = scaleValues.filter(function ( obj ) {
-      return obj.value !== d.value;
-    });
-    draw();
-  });
-
-  colorSelection.exit()
-    .transition()
-    .duration(1000)
-    .style("opacity", 0)
-    .remove();
-
-  colorSelection
-    .transition()
-    .delay(1000)
-    .duration(1000)
-    .attr("transform", function(d, i){return"translate(10, "+((i+1)*squareHeight*1.1 + 10)+")";})
-}
-
-draw();
-
+svg.call(scale);
 
 </script>
