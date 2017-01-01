@@ -4,11 +4,27 @@ d3.ColorScaleChooser = function(){
   var scaleValues = [];
   var parent = null;
   var dispatcher = d3.dispatch("change");
+  var title = null;
+  var yOffset = 0;
 
   function ColorScaleChooser(g){
     parent = g;
+
+
+    if(title){
+      g.append("text")
+      .attr("x", 5)
+      .attr("y", 15)
+      .style("fill", "#666")
+      .style("font-size", (0.6*squareHeight)+"px")
+      .style("font-family", "Verdana")
+      .text(title);
+
+    yOffset = 0.6*squareHeight;
+    }
+
     var addGroup = g.append("g")
-    .attr("transform","translate(10, 10)")
+    .attr("transform","translate(10, "+(10+yOffset)+")")
     .on("click", function(){
       var newValue = {value: 0, color: "#ffffff"};
       scaleValues.push(newValue);
@@ -56,6 +72,11 @@ d3.ColorScaleChooser = function(){
     return ColorScaleChooser;
   };
 
+  ColorScaleChooser.title = function(_){
+    title = _;
+    return ColorScaleChooser;
+  };
+
   ColorScaleChooser.on = function(){
     var value = dispatcher.on.apply(dispatcher, arguments);
     return value === dispatcher ? ColorScaleChooser : value;
@@ -75,13 +96,13 @@ d3.ColorScaleChooser = function(){
     .enter()
     .append("g")
     .attr("class","step")
-    .attr("transform", function(d, i){return"translate(10, "+((i+1)*squareHeight*1.1 + 10)+")";})
-    .on("mouseover", function(d){
+    .attr("transform", function(d, i){return"translate(10, "+((i+1)*squareHeight*1.1 + 10 + yOffset)+")";})
+    .on("mouseover", function(){
       d3.select(this)
         .selectAll(".close")
         .style("visibility", "visible");
     })
-    .on("mouseout", function(d){
+    .on("mouseout", function(){
       d3.select(this)
         .selectAll(".close")
         .style("visibility", "hidden");
@@ -94,7 +115,7 @@ d3.ColorScaleChooser = function(){
     .attr("y", 0)
     .style("fill",function(d){ return d.color;})
     .style("stroke", "#000")
-    .on("click", function(d){form(d);});
+    .on("click", function(d){ form(d);});
 
 
 
@@ -130,7 +151,7 @@ d3.ColorScaleChooser = function(){
       .transition()
       .delay(1000)
       .duration(1000)
-      .attr("transform", function(d, i){return"translate(10, "+((i+1)*squareHeight*1.1 + 10)+")";});
+      .attr("transform", function(d, i){return"translate(10, "+((i+1)*squareHeight*1.1 + 10 + yOffset)+")";});
 
     dispatcher.call("change", {},
               scaleValues,
@@ -139,12 +160,19 @@ d3.ColorScaleChooser = function(){
   }
 
   function form(obj){
-    d3.selectAll(".form")
+    console.info(d3.event.pageX, d3.event.pageY);
+    d3.selectAll(".colorScaleForm")
       .remove();
 
     var formDiv = d3.select("body")
       .append("div")
-      .attr("class", "form");
+      .attr("class", "colorScaleForm")
+      .style("position", "absolute")
+      .style("left", (20+d3.event.pageX)+"px")
+      .style("top", d3.event.pageY+"px")
+      .style("background-color","rgba(128, 128, 128, 0.55)")
+      .style("border-radius","5px")
+      .style("padding","5px");
 
     formDiv.append("label")
     .text("Value");

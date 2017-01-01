@@ -23,11 +23,12 @@ var squareWidth = 80, squareHeight = 30;
 var svg = d3.select("body")
   .append("svg")
   .attr("width", 200)
-  .attr("height", 500);
+  .attr("height", 400);
 
 var scale = d3.ColorScaleChooser()
   .squareWidth(50)
   .scaleValues(scaleValues)
+  .title("Altitude (m)")
   .on("change", function(d, min, max){
     console.info("CHANGE", d, max, min);
     var scaleWidth = 500;
