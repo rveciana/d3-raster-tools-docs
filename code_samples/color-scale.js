@@ -5,6 +5,7 @@ d3.ColorScaleChooser = function(){
   var parent = null;
   var dispatcher = d3.dispatch("change");
   var title = null;
+  var addText = "Add";
   var yOffset = 0;
 
   function ColorScaleChooser(g){
@@ -52,7 +53,7 @@ d3.ColorScaleChooser = function(){
     .style("fill", "#666")
     .style("font-size", (0.425*squareHeight)+"px")
     .style("font-family", "Verdana")
-    .text("Add");
+    .text(addText);
 
     draw();
   }
@@ -74,6 +75,11 @@ d3.ColorScaleChooser = function(){
 
   ColorScaleChooser.title = function(_){
     title = _;
+    return ColorScaleChooser;
+  };
+
+  ColorScaleChooser.addText = function(_){
+    addText = _;
     return ColorScaleChooser;
   };
 

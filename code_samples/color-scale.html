@@ -30,7 +30,6 @@ var scale = d3.ColorScaleChooser()
   .scaleValues(scaleValues)
   .title("Altitude (m)")
   .on("change", function(d, min, max){
-    console.info("CHANGE", d, max, min);
     var scaleWidth = 500;
     d3.select("#colorScale").remove();
     var canvasColorScale = d3.select("body").append("canvas")
