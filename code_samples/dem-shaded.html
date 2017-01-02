@@ -108,7 +108,13 @@ d3.json("swiss.json", function(error, topojsonData) {
   }
 
   contextShaded.putImageData( idShaded, 0, 0);
+
   context.drawImage(canvasShaded.node(), 0, 0);
+  context.globalAlpha = 0.7;
+  context.fillStyle = '#ffffff';
+  context.fillRect(0,0,width,height);
+  context.fill();
+  context.globalAlpha = 1;
 
   //Creating the color scale https://github.com/santilland/plotty/blob/master/src/plotty.js
   var cs_def = {positions:[0, 0.2, 0.4, 0.6, 0.8, 1], colors:["#c9d5a6", "#7fa67a", "#976a2f", "#79750a", "#7ab5e3", "#fefefe"]};
@@ -181,6 +187,7 @@ d3.json("swiss.json", function(error, topojsonData) {
   context.beginPath();
   path(countries);
   context.clip();
+  context.drawImage(canvasShaded.node(), 0, 0);
   context.drawImage(canvasRaster.node(), 0, 0);
   context.restore();
 

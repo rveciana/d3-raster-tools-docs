@@ -121,6 +121,7 @@ d3.json("swiss.json", function(error, topojsonData) {
 
   var scale = d3.ColorScaleChooser()
     .squareWidth(50)
+    .squareHeight(30)
     .scaleValues(scaleValues)
     .title("Altitude (m)")
     .on("change", function(d, min, max){
@@ -135,7 +136,10 @@ d3.json("swiss.json", function(error, topojsonData) {
       var gradient = contextColorScale.createLinearGradient(0, 0, scaleWidth, 1);
 
       for (var i = 0; i < d.length; ++i) {
-        gradient.addColorStop((d[i].value-min)/(max-min), d[i].color);
+        var position = (d[i].value-min)/(max-min);
+        if(position >= 0 && position < scaleWidth){
+          gradient.addColorStop(position, d[i].color);
+        }
       }
       contextColorScale.fillStyle = gradient;
       contextColorScale.fillRect(0, 0, scaleWidth, 1);
@@ -147,7 +151,10 @@ d3.json("swiss.json", function(error, topojsonData) {
 
   var svg = d3.select("body").append("svg")
       .attr("width", 150)
-      .attr("height", 300);
+      .attr("height", 500)
+      .style("position", "absolute")
+      .style("left", "10px")
+      .style("top", "10px");
   svg.call(scale);
 
 
