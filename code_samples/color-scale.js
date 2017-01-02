@@ -166,7 +166,6 @@ d3.ColorScaleChooser = function(){
   }
 
   function form(obj){
-    console.info(d3.event.pageX, d3.event.pageY);
     d3.selectAll(".colorScaleForm")
       .remove();
 
