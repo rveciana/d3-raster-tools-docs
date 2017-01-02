@@ -1,0 +1,147 @@
+---
+layout: default
+title: "DEM colors"
+---
+
+This example shows a simple way to represent DEM data. The way to draw it is the same as in the [raster interpolation example]({{ site.baseurl }}/code_samples/raster-interpolation-page.html). The way to show only the region of interest is using the [canvas clip](http://www.w3schools.com/tags/canvas_clip.asp) method.
+
+The DEM data is taken from the SRTM web, and the Swiss contour from [this swiss-maps page](https://github.com/interactivethings/swiss-maps). More information [here]({{ site.baseurl }}/code_samples/swiss-page.html).
+
+<iframe frameborder="no" border="0" scrolling="no" marginwidth="0" marginheight="0" width="690" height="510" src="{{ site.baseurl }}/code_samples/dem-colors.html"></iframe>
+
+{% highlight js %}
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+</style>
+<body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="geotiff.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script>
+var width = 600,
+    height = 500;
+
+var projection = d3.geoAzimuthalEqualArea()
+    .rotate([-10.5, -46.7])
+    .scale(7500);
+
+var canvas = d3.select("body").append("canvas")
+    .attr("width", width)
+    .attr("height", height);
+
+var context = canvas.node().getContext("2d");
+d3.request("swiss.tiff")
+  .responseType('arraybuffer')
+  .get(function(error, tiffData){
+d3.json("swiss.json", function(error, topojsonData) {
+  var countries = topojson.feature(topojsonData, topojsonData.objects.country);
+
+  var path = d3.geoPath()
+      .projection(projection).context(context);
+
+  var tiff = GeoTIFF.parse(tiffData.response);
+  var image = tiff.getImage();
+  var rasters = image.readRasters();
+  var tiepoint = image.getTiePoints()[0];
+  var pixelScale = image.getFileDirectory().ModelPixelScale;
+  var geoTransform = [tiepoint.x, pixelScale[0], 0, tiepoint.y, 0, -1*pixelScale[1]];
+  var invGeoTransform = [-geoTransform[0]/geoTransform[1], 1/geoTransform[1],0,-geoTransform[3]/geoTransform[5],0,1/geoTransform[5]];
+
+  var altData = new Array(image.getHeight());
+  for (var j = 0; j<image.getHeight(); j++){
+      altData[j] = new Array(image.getWidth());
+      for (var i = 0; i<image.getWidth(); i++){
+          altData[j][i] = rasters[0][i + j*image.getWidth()];
+      }
+  }
+
+
+  //Creating the color scale https://github.com/santilland/plotty/blob/master/src/plotty.js
+  var cs_def = {positions:[0, 0.2, 0.4, 0.6, 0.8, 1], colors:["#c9d5a6", "#7fa67a", "#976a2f", "#79750a", "#7ab5e3", "#fefefe"]};
+  var scaleWidth = 256;
+  var canvasColorScale = d3.select("body").append("canvas")
+      .attr("width", scaleWidth)
+      .attr("height", 1)
+      ;//.style("display","none");
+  var contextColorScale = canvasColorScale.node().getContext("2d");
+  var gradient = contextColorScale.createLinearGradient(0, 0, scaleWidth, 1);
+
+  for (var i = 0; i < cs_def.colors.length; ++i) {
+    gradient.addColorStop(cs_def.positions[i], cs_def.colors[i]);
+  }
+  contextColorScale.fillStyle = gradient;
+  contextColorScale.fillRect(0, 0, scaleWidth, 1);
+
+  var csImageData = contextColorScale.getImageData(0, 0, scaleWidth, 1).data;
+
+  //Drawing the image
+
+  var canvasRaster = d3.select("body").append("canvas")
+      .attr("width", width)
+      .attr("height", height)
+      .style("display","none");
+
+  var contextRaster = canvasRaster.node().getContext("2d");
+
+  var id = contextRaster.createImageData(width,height);
+  var data = id.data;
+  var pos = 0;
+  for(var j = 0; j<height; j++){
+    for(var i = 0; i<width; i++){
+      var pointCoords = projection.invert([i,j]);
+      var px = invGeoTransform[0] + pointCoords[0]* invGeoTransform[1];
+      var py = invGeoTransform[3] + pointCoords[1] * invGeoTransform[5];
+
+      var value;
+      if(Math.floor(px) >= 0 && Math.ceil(px) < image.getWidth() && Math.floor(py) >= 0 && Math.ceil(py) < image.getHeight()){
+        //https://en.wikipedia.org/wiki/Bilinear_interpolation
+        var dist1 = (Math.ceil(px)-px)*(Math.ceil(py)-py);
+        var dist2 = (px-Math.floor(px))*(Math.ceil(py)-py);
+        var dist3 = (Math.ceil(px)-px)*(py-Math.floor(py));
+        var dist4 = (px-Math.floor(px))*(py-Math.floor(py));
+        if (dist1 != 0 || dist2!=0 || dist3!=0 || dist4!=0){
+          value = altData[Math.floor(py)][Math.floor(px)]*dist1+
+          altData[Math.floor(py)][Math.ceil(px)]*dist2 +
+          altData[Math.ceil(py)][Math.floor(px)]*dist3 +
+          altData[Math.ceil(py)][Math.ceil(px)]*dist4;
+        } else {
+          value = altData[Math.floor(py)][Math.floor(px)];
+        }
+      } else {
+        value = -999;
+      }
+        var c = Math.round((scaleWidth-1) * ((value - 200)/3900));
+        var alpha = 200;
+        if(c<0) c=0;
+        if(c>=scaleWidth) c=scaleWidth-1;
+        data[pos]   = csImageData[c*4];;
+        data[pos+1]   = csImageData[c*4+1];
+        data[pos+2]   = csImageData[c*4+2];
+        data[pos+3]   = alpha;
+        pos = pos + 4
+
+    }
+  }
+  contextRaster.putImageData( id, 0, 0);
+  context.save();
+  context.beginPath();
+  path(countries);
+  context.clip();
+  context.drawImage(canvasRaster.node(), 0, 0);
+  context.restore();
+
+
+  context.beginPath();
+  context.strokeStyle = "#777";
+  path(countries);
+  context.stroke();
+
+});
+});
+</script>
+
+</body>
+{% endhighlight %}
