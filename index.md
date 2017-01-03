@@ -39,3 +39,4 @@ Other visualization examples
 
 |----------|:-------------:|
 |[<img src="{{ site.baseurl }}/images/examples/vardah-layers.png" /> Layer selection]({{ site.baseurl }}/code_samples/vardah-layers-page.html) | [<img src="{{ site.baseurl }}/images/examples/vardah-streamlines.png" /> Animated streamlines]({{ site.baseurl }}/code_samples/vardah-streamlines-page.html) |
+|[<img src="{{ site.baseurl }}/images/examples/color-scale-isobands.png" /> Color scale isobands]({{ site.baseurl }}/code_samples/color-scale-isobands-page.html) | [<img src="{{ site.baseurl }}/images/examples/color-scale-interpolation.png" /> Color scale interpolation]({{ site.baseurl }}/code_samples/color-scale-interpolation-page.html) |
