@@ -2,9 +2,9 @@
 layout: default
 title: "Color scale isobands"
 ---
-This example shows how to use the [color scale chooser]([source code is here]({{ site.baseurl }}/code_samples/color-scale-page.html) with the [raster-marching-squares](https://github.com/rveciana/raster-marching-squares) library. Click on the color scale to change, remove or add the colors and values.
+This example shows how to use the [color scale chooser]({{ site.baseurl }}/code_samples/color-scale-page.html) with the [raster-marching-squares](https://github.com/rveciana/raster-marching-squares) library. Click on the color scale to change, remove or add the colors and values.
 
-* Take a look at [this example]([source code is here]({{ site.baseurl }}/code_samples/color-scale-page.html) to see how does the *color scale chooser* work
+* Take a look at [this example]({{ site.baseurl }}/code_samples/color-scale-page.html) to see how does the *color scale chooser* work
 * [This section]({{ site.baseurl }}{% post_url 2016-12-13-isobands %}) shows how to use the library to calculate the isobands
 
 <iframe frameborder="no" border="0" scrolling="no" marginwidth="0" marginheight="0" width="690" height="510" src="{{ site.baseurl }}/code_samples/color-scale-isobands.html"></iframe>
