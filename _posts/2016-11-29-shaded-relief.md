@@ -17,8 +17,8 @@ You can find [the whole code here]({{ site.baseurl }}/code_samples/dem-shaded-pa
 
 {% highlight js %}
 context.clip();
-context.drawImage(canvasShaded.node(), 0, 0);
 context.drawImage(canvasRaster.node(), 0, 0);
+context.drawImage(canvasShaded.node(), 0, 0);
 context.restore();
 {% endhighlight %}
 
@@ -70,7 +70,7 @@ for (var j = 0; j<image.getHeight(); j++){
   * Since the borders don't have both side pixels, a check has to be done and apply the correct case
   * The central difference, in this case, is a simple average of the left and right differences
   * The gradient is calculated in the *x* and *y* directions
-* The slope is simply thearctan of the module of the gradient in both directions
+* The slope is simply the *arctan* of the module of the gradient in both directions
 * The aspect is the direction of the slope. It's important to note which component and sign goes first.
 * Once the slope and aspect are calculated, the shaded relief data is directly calculated
 
@@ -101,7 +101,7 @@ for(var j = 0; j<height; j++){
     dataShaded[posShaded]   = shadedValue;
     dataShaded[posShaded+1]   = shadedValue;
     dataShaded[posShaded+2]   = shadedValue;
-    dataShaded[posShaded+3]   = 150;
+    dataShaded[posShaded+3]   = 255 - shadedValue;
 
     posShaded=posShaded+4;
   }
@@ -111,3 +111,4 @@ contextShaded.putImageData( idShaded, 0, 0);
 {% endhighlight %}
 
 * Once the shaded relief data is known, the image of the shaded relief is calculated taking the closest pixel for each image pixel
+* Note that the alpha value is the inverse of the calculated hillshade value, as [explained here](http://gis.stackexchange.com/questions/144535/how-to-create-transparent-hillshade). Using this, the shades will be much sharper, and the flat zones won't add noise to the colored image

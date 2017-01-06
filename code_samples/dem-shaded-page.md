@@ -115,7 +115,7 @@ d3.json("swiss.json", function(error, topojsonData) {
       dataShaded[posShaded]   = shadedValue;
       dataShaded[posShaded+1]   = shadedValue;
       dataShaded[posShaded+2]   = shadedValue;
-      dataShaded[posShaded+3]   = 150;
+      dataShaded[posShaded+3]   = 255 - shadedValue;
 
       posShaded=posShaded+4;
     }
@@ -124,6 +124,7 @@ d3.json("swiss.json", function(error, topojsonData) {
   contextShaded.putImageData( idShaded, 0, 0);
 
   context.drawImage(canvasShaded.node(), 0, 0);
+
   context.globalAlpha = 0.7;
   context.fillStyle = '#ffffff';
   context.fillRect(0,0,width,height);
@@ -185,7 +186,7 @@ d3.json("swiss.json", function(error, topojsonData) {
         value = -999;
       }
         var c = Math.round((scaleWidth-1) * ((value - 200)/3900));
-        var alpha = 200;
+        var alpha = 255;
         if(c<0) c=0;
         if(c>=scaleWidth) c=scaleWidth-1;
         data[pos]   = csImageData[c*4];;
@@ -201,8 +202,10 @@ d3.json("swiss.json", function(error, topojsonData) {
   context.beginPath();
   path(countries);
   context.clip();
-  context.drawImage(canvasShaded.node(), 0, 0);
+
   context.drawImage(canvasRaster.node(), 0, 0);
+  context.globalAlpha = 0.5;
+  context.drawImage(canvasShaded.node(), 0, 0);
   context.restore();
 
 
